@@ -1,0 +1,53 @@
+/* 全体の基本設定 */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: #f5f7fa;
+  color: #333;
+}
+
+/* ヘッダー */
+header {
+  background: #8bc34a;
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+header h1 {
+  margin: 0;
+}
+
+/* ナビゲーション */
+nav {
+  background: #e8f5e9;
+  padding: 10px;
+  text-align: center;
+}
+
+nav a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+/* メインコンテンツ */
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* フッター */
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  color: #777;
+  font-size: 14px;
+}
