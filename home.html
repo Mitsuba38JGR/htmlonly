@@ -43,11 +43,12 @@ function toggleMenu() {
 
   if (isOpen) {
     menu.classList.remove("open");
-    menu.style.right = "-240px";
+    menu.style.left = "-240px"; // 閉じる
   } else {
     menu.classList.add("open");
-    menu.style.right = "0px";
+    menu.style.left = "0px"; // 開く
   }
 }
 </script>
+
 
