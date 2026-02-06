@@ -39,10 +39,15 @@
 <script>
 function toggleMenu() {
   const menu = document.getElementById("sideMenu");
-  if (menu.style.right === "0px") {
-    menu.style.right = "-220px"; // 閉じる
+  const isOpen = menu.classList.contains("open");
+
+  if (isOpen) {
+    menu.classList.remove("open");
+    menu.style.left = "-240px"; // 閉じる
   } else {
-    menu.style.right = "0px"; // 開く
+    menu.classList.add("open");
+    menu.style.left = "0px"; // 開く
   }
 }
 </script>
+
