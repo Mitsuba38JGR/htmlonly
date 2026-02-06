@@ -51,3 +51,35 @@ footer {
   color: #777;
   font-size: 14px;
 }
+/* スマホ対応（画面幅600px以下） */
+@media (max-width: 600px) {
+
+  header {
+    padding: 15px;
+    font-size: 18px;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 6px 8px;
+    font-size: 14px;
+  }
+
+  .container {
+    margin: 20px 10px;
+    padding: 20px;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1, h2 {
+    font-size: 22px;
+  }
+
+  body {
+    font-size: 15px;
+  }
+}
