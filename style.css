@@ -1,46 +1,61 @@
-/* 全体の基本設定 */
+//* 全体 */
 body {
   margin: 0;
   padding: 0;
-  font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-  background: #f5f7fa;
-  color: #333;
+  background: #0d0f12; /* ダーク基板色 */
+  color: #d0f0ff; /* 青白い電子光 */
+  font-family: "Consolas", "Courier New", monospace; /* 電子系フォント */
 }
 
 /* ヘッダー */
 header {
-  background: #8bc34a;
+  background: #0b1a24;
   padding: 20px;
   text-align: center;
-  color: white;
+  border-bottom: 2px solid #00e5ff; /* ネオンライン */
 }
 
 header h1 {
   margin: 0;
+  color: #00e5ff;
+  text-shadow: 0 0 8px #00e5ff;
 }
 
 /* ナビゲーション */
 nav {
-  background: #e8f5e9;
+  background: #0f1f2a;
   padding: 10px;
   text-align: center;
+  border-bottom: 1px solid #004d66;
 }
 
 nav a {
   margin: 0 12px;
   text-decoration: none;
-  color: #4caf50;
+  color: #66eaff;
   font-weight: bold;
+  text-shadow: 0 0 4px #00e5ff;
 }
 
-/* メインコンテンツ */
+nav a:hover {
+  color: #00e5ff;
+}
+
+/* コンテナ */
 .container {
   max-width: 800px;
   margin: 40px auto;
-  background: white;
+  background: #111820;
   padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  border: 1px solid #003f52;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+/* 見出し */
+h2 {
+  color: #00e5ff;
+  text-shadow: 0 0 6px #00e5ff;
 }
 
 /* フッター */
@@ -48,9 +63,11 @@ footer {
   text-align: center;
   padding: 20px;
   margin-top: 40px;
-  color: #777;
+  color: #66eaff;
   font-size: 14px;
+  border-top: 1px solid #003f52;
 }
+
 /* スマホ対応（画面幅600px以下） */
 @media (max-width: 600px) {
 
