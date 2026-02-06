@@ -130,3 +130,18 @@ footer {
   font-size: 18px;
   text-shadow: 0 0 6px #00e5ff;
 }
+/* 固定タスクバー */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #0f1f2a;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #00e5ff;
+  z-index: 1000;
+}
+
+body {
+  padding-top: 60px; /* タスクバーの高さ分ずらす */
+}
