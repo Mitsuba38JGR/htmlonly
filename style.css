@@ -144,8 +144,7 @@ nav {
 
 body {
   padding-top: 60px; /* タスクバーの高さ分ずらす */
-}
-/* ハンバーガーアイコン */
+}/* ハンバーガーアイコン */
 .hamburger {
   position: fixed;
   top: 15px;
@@ -157,18 +156,18 @@ body {
   text-shadow: 0 0 8px #00e5ff;
 }
 
-/* スライドメニュー（右側から出る） */
+/* 左側スライドメニュー */
 .side-menu {
   position: fixed;
   top: 0;
-  right: -240px; /* 初期状態は隠す */
+  left: -240px; /* ← 初期状態は隠す */
   width: 240px;
   height: 100%;
-  background: #000; /* ← 黒色に変更 */
-  border-left: 2px solid #00e5ff;
-  box-shadow: -4px 0 15px rgba(0, 229, 255, 0.3);
+  background: #000; /* 黒背景 */
+  border-right: 2px solid #00e5ff;
+  box-shadow: 4px 0 15px rgba(0, 229, 255, 0.3);
   padding-top: 60px;
-  transition: right 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1500;
 }
 
@@ -187,3 +186,4 @@ body {
   background: #112733;
   color: #00e5ff;
 }
+
