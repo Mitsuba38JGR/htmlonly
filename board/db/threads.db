@@ -1,1 +1,13 @@
+threads (
+  id INTEGER PRIMARY KEY,
+  title TEXT,
+  created_by INTEGER
+)
 
+posts (
+  id INTEGER PRIMARY KEY,
+  thread_id INTEGER,
+  user_id INTEGER,
+  content TEXT,
+  number INTEGER
+)
