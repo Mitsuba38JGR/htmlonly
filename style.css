@@ -186,4 +186,42 @@ body {
   background: #112733;
   color: #00e5ff;
 }
+/* プレイ画面（フルスクリーン風） */
+.play-screen {
+  margin: 0;
+  padding: 0;
+  background: #000; /* 完全黒で没入感 */
+  overflow: hidden;
+}
 
+/* ゲームキャンバス */
+#gameCanvas {
+  display: block;
+  margin: 0 auto;
+  background: #000;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* 戻るボタン（電子系） */
+.back-button {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  padding: 8px 14px;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  text-decoration: none;
+  font-family: "Consolas", monospace;
+  border-radius: 6px;
+  text-shadow: 0 0 6px #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+  z-index: 2000;
+  transition: 0.2s;
+}
+
+.back-button:hover {
+  background: rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.6);
+}
