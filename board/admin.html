@@ -1,1 +1,9 @@
-
+<form action="/admin/token" method="POST">
+  <input type="text" name="username" placeholder="ユーザー名">
+  <input type="number" name="days" placeholder="日数">
+  <select name="plan">
+    <option value="premium">プレミアム</option>
+    <option value="vip">VIP</option>
+  </select>
+  <button type="submit">発行</button>
+</form>
