@@ -1,8 +1,0 @@
-users (
-  id INTEGER PRIMARY KEY,
-  username TEXT UNIQUE,
-  password TEXT,
-  premium_until TEXT,
-  vip_until TEXT,
-  profile TEXT
-)
