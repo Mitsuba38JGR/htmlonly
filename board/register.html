@@ -1,6 +1,18 @@
-<form action="/register" method="POST" class="login-box">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <script src="script.js"></script>
+</head>
+<body>
+
   <h2>ユーザー登録</h2>
-  <input type="text" name="username" placeholder="ユーザー名">
-  <input type="password" name="password" placeholder="パスワード">
-  <button type="submit">登録</button>
-</form>
+
+  <input id="username" placeholder="ユーザー名"><br>
+  <input id="password" type="password" placeholder="パスワード"><br>
+
+  <button onclick="registerUser()">登録</button>
+
+</body>
+</html>
