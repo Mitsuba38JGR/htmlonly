@@ -98,8 +98,8 @@ function draw() {
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawMatrix(arena, { x: 0, y: 0 });
-  drawMatrix(player.matrix, player.pos);
+  drawMatrix(arena, { x: 0, y: 0 }, "cyan");
+  drawMatrix(player.matrix, player.pos, "cyan");
 }
 
 function drawMatrix(matrix, offset) {
