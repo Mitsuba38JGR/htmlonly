@@ -1,9 +1,16 @@
-<form action="/admin/token" method="POST">
-  <input type="text" name="username" placeholder="ユーザー名">
-  <input type="number" name="days" placeholder="日数">
-  <select name="plan">
-    <option value="premium">プレミアム</option>
-    <option value="vip">VIP</option>
-  </select>
-  <button type="submit">発行</button>
-</form>
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+  <meta charset="UTF-8">
+  <title>Admin Login</title>
+  <script src="script.js"></script>
+</head>
+<body>
+
+  <h2>管理者ログイン</h2>
+
+  <input id="token" placeholder="管理者トークン"><br>
+  <button onclick="adminLogin()">ログイン</button>
+
+</body>
+</html>
