@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>プレイ画面</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../../style.css">
+  <title>Tetris</title>
+  <style>
+    canvas {
+      background: #111;
+      display: block;
+      margin: auto;
+    }
+  </style>
 </head>
-<body class="play-screen">
+<body>
 
-  <!-- ゲーム本体（canvas や div など） -->
-  <canvas id="gameCanvas"></canvas>
-
+  <canvas id="tetris" width="240" height="400"></canvas>
+  <script src="tetris.js"></script>
   <!-- 戻るボタン（電子系デザイン） -->
   <a href="../info.html" class="back-button">← 戻る</a>
 
