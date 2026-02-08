@@ -33,7 +33,36 @@
     ソフトドロップ速度:
     <input type="number" id="softDropSpeed" min="10" max="200" step="10">
   </label><br><br>
+  
+<h3>キーコンフィグ</h3>
 
+<label>左移動:
+  <input type="text" id="keyLeft" readonly onclick="startKeyCapture('keyLeft')">
+</label><br>
+
+<label>右移動:
+  <input type="text" id="keyRight" readonly onclick="startKeyCapture('keyRight')">
+</label><br>
+
+<label>ソフトドロップ:
+  <input type="text" id="keySoftDrop" readonly onclick="startKeyCapture('keySoftDrop')">
+</label><br>
+
+<label>ハードドロップ:
+  <input type="text" id="keyHardDrop" readonly onclick="startKeyCapture('keyHardDrop')">
+</label><br>
+
+<label>左回転:
+  <input type="text" id="keyRotateLeft" readonly onclick="startKeyCapture('keyRotateLeft')">
+</label><br>
+
+<label>右回転:
+  <input type="text" id="keyRotateRight" readonly onclick="startKeyCapture('keyRotateRight')">
+</label><br>
+
+<label>ホールド:
+  <input type="text" id="keyHold" readonly onclick="startKeyCapture('keyHold')">
+</label><br>
   <button onclick="saveSettings()">保存</button>
 
 </body>
