@@ -1,3 +1,10 @@
+const settings = JSON.parse(localStorage.getItem("tetris_settings")) || {
+  ghost: true,
+  hardDrop: true,
+  hold: true,
+  bag7: true,
+  softDropSpeed: 50,
+};
 const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
 
@@ -414,4 +421,25 @@ function drawMatrixNext(matrix, offset) {
       }
     });
   });
+}
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem("tetris_settings")) || {};
+
+  document.getElementById("ghost").checked = s.ghost ?? true;
+  document.getElementById("hardDrop").checked = s.hardDrop ?? true;
+  document.getElementById("hold").checked = s.hold ?? true;
+  document.getElementById("bag7").checked = s.bag7 ?? true;
+  document.getElementById("softDropSpeed").value = s.softDropSpeed ?? 50;
+}
+function saveSettings() {
+  const s = {
+    ghost: document.getElementById("ghost").checked,
+    hardDrop: document.getElementById("hardDrop").checked,
+    hold: document.getElementById("hold").checked,
+    bag7: document.getElementById("bag7").checked,
+    softDropSpeed: Number(document.getElementById("softDropSpeed").value),
+  };
+
+  localStorage.setItem("tetris_settings", JSON.stringify(s));
+  alert("設定を保存しました！");
 }
