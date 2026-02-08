@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Settings</title>
+  <script src="tetris_settings.js"></script>
+</head>
+<body onload="loadSettings()">
+
+  <h2>テトリス設定</h2>
+
+  <label>
+    <input type="checkbox" id="ghost">
+    ゴーストミノ
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="hardDrop">
+    ハードドロップ
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="hold">
+    ホールド
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="bag7">
+    7-Bag ランダム
+  </label><br>
+
+  <label>
+    ソフトドロップ速度:
+    <input type="number" id="softDropSpeed" min="10" max="200" step="10">
+  </label><br><br>
+
+  <button onclick="saveSettings()">保存</button>
+
+</body>
+</html>
