@@ -180,6 +180,7 @@ const player = {
 
 playerReset();
 update();
+drawNext();
 function rotate(matrix, dir) {
   // 転置
   for (let y = 0; y < matrix.length; y++) {
@@ -389,4 +390,28 @@ function playerReset() {
   if (collide(arena, player)) {
     arena.forEach(row => row.fill(0));
   }
+}
+const nextCanvas = document.getElementById("next");
+const nextCtx = nextCanvas.getContext("2d");
+nextCtx.scale(20, 20);
+function drawNext() {
+  nextCtx.fillStyle = "#000";
+  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+  const preview = bag.slice(-5).reverse(); // 次の5つ
+
+  preview.forEach((type, i) => {
+    const matrix = createPiece(type);
+    drawMatrixNext(matrix, { x: 1, y: i * 4 + 1 });
+  });
+}
+function drawMatrixNext(matrix, offset) {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        nextCtx.fillStyle = "cyan";
+        nextCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
+      }
+    });
+  });
 }
