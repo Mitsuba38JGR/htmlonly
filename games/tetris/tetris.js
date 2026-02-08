@@ -1,9 +1,12 @@
-const settings = JSON.parse(localStorage.getItem("tetris_settings")) || {
-  ghost: true,
-  hardDrop: true,
-  hold: true,
-  bag7: true,
-  softDropSpeed: 50,
+const settings = JSON.parse(localStorage.getItem("tetris_settings")) || {};
+const keys = settings.keys || {
+  keyLeft: "ArrowLeft",
+  keyRight: "ArrowRight",
+  keySoftDrop: "ArrowDown",
+  keyHardDrop: " ",
+  keyRotateLeft: "z",
+  keyRotateRight: "x",
+  keyHold: "c"
 };
 const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
@@ -438,6 +441,65 @@ function saveSettings() {
     hold: document.getElementById("hold").checked,
     bag7: document.getElementById("bag7").checked,
     softDropSpeed: Number(document.getElementById("softDropSpeed").value),
+  };
+
+  localStorage.setItem("tetris_settings", JSON.stringify(s));
+  alert("設定を保存しました！");
+}
+const defaultKeys = {
+  keyLeft: "ArrowLeft",
+  keyRight: "ArrowRight",
+  keySoftDrop: "ArrowDown",
+  keyHardDrop: " ",
+  keyRotateLeft: "Ctrl",
+  keyRotateRight: "ArrowUp",
+  keyHold: "c"
+};
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem("tetris_settings")) || {};
+
+  // 既存設定
+  document.getElementById("ghost").checked = s.ghost ?? true;
+  document.getElementById("hardDrop").checked = s.hardDrop ?? true;
+  document.getElementById("hold").checked = s.hold ?? true;
+  document.getElementById("bag7").checked = s.bag7 ?? true;
+  document.getElementById("softDropSpeed").value = s.softDropSpeed ?? 50;
+
+  // キー設定
+  const keys = s.keys || defaultKeys;
+  for (const k in keys) {
+    document.getElementById(k).value = keys[k];
+  }
+}
+let capturingKey = null;
+
+function startKeyCapture(id) {
+  capturingKey = id;
+  document.getElementById(id).value = "Press key...";
+}
+
+document.addEventListener("keydown", e => {
+  if (capturingKey) {
+    document.getElementById(capturingKey).value = e.key;
+    capturingKey = null;
+  }
+});
+function saveSettings() {
+  const s = {
+    ghost: document.getElementById("ghost").checked,
+    hardDrop: document.getElementById("hardDrop").checked,
+    hold: document.getElementById("hold").checked,
+    bag7: document.getElementById("bag7").checked,
+    softDropSpeed: Number(document.getElementById("softDropSpeed").value),
+    keys: {
+      keyLeft: document.getElementById("keyLeft").value,
+      keyRight: document.getElementById("keyRight").value,
+      keySoftDrop: document.getElementById("keySoftDrop").value,
+      keyHardDrop: document.getElementById("keyHardDrop").value,
+      keyRotateLeft: document.getElementById("keyRotateLeft").value,
+      keyRotateRight: document.getElementById("keyRotateRight").value,
+      keyHold: document.getElementById("keyHold").value,
+    }
   };
 
   localStorage.setItem("tetris_settings", JSON.stringify(s));
