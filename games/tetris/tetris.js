@@ -149,19 +149,43 @@ function playerReset() {
 
 // キー操作
 document.addEventListener("keydown", event => {
-  if (event.key === "ArrowLeft") {
+
+  if (event.key === keys.keyLeft) {
     player.pos.x--;
-    if (collide(arena, player)) {
-      player.pos.x++;
-    }
-  } else if (event.key === "ArrowRight") {
+    if (collide(arena, player)) player.pos.x++;
+  }
+
+  else if (event.key === keys.keyRight) {
     player.pos.x++;
-    if (collide(arena, player)) {
-      player.pos.x--;
-    }
-  } else if (event.key === "ArrowDown") {
+    if (collide(arena, player)) player.pos.x--;
+  }
+
+  else if (event.key === keys.keySoftDrop) {
     playerDrop();
   }
+
+  else if (event.key === keys.keyHardDrop) {
+    if (settings.hardDrop) {
+      while (!collide(arena, player)) player.pos.y++;
+      player.pos.y--;
+      merge(arena, player);
+      playerReset();
+      dropCounter = 0;
+    }
+  }
+
+  else if (event.key === keys.keyRotateLeft) {
+    playerRotate(-1);
+  }
+
+  else if (event.key === keys.keyRotateRight) {
+    playerRotate(1);
+  }
+
+  else if (event.key === keys.keyHold) {
+    playerHold();
+  }
+
 });
 
 // ゲームループ
