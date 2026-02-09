@@ -1,72 +1,243 @@
-const settings = JSON.parse(localStorage.getItem("tetris_settings")) || {};
-const keys = settings.keys || {
+// ===============================
+//  設定読み込み（localStorage）
+// ===============================
+const settings = JSON.parse(localStorage.getItem("tetris_settings")) || {
+  ghost: true,
+  hardDrop: true,
+  hold: true,
+  bag7: true,
+  softDropSpeed: 50,
+  das: 120,
+  arr: 20,
+};
+
+// ===============================
+//  キーコンフィグ
+// ===============================
+const keys = (settings.keys) || {
   keyLeft: "ArrowLeft",
   keyRight: "ArrowRight",
   keySoftDrop: "ArrowDown",
   keyHardDrop: " ",
   keyRotateLeft: "z",
   keyRotateRight: "x",
-  keyHold: "c"
+  keyHold: "c",
 };
+
+// ===============================
+//  キャンバス
+// ===============================
 const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
-
 ctx.scale(20, 20);
 
-// テトリミノの形
+const nextCanvas = document.getElementById("next");
+const nextCtx = nextCanvas.getContext("2d");
+nextCtx.scale(20, 20);
+
+const holdCanvas = document.getElementById("hold");
+const holdCtx = holdCanvas.getContext("2d");
+holdCtx.scale(20, 20);
+
+// ===============================
+//  ミノ定義（形 + 色）
+// ===============================
+const pieceColors = {
+  I: "#00f0f0",
+  O: "#f0f000",
+  T: "#a000f0",
+  S: "#00f000",
+  Z: "#f00000",
+  J: "#0000f0",
+  L: "#f0a000",
+};
+
 function createPiece(type) {
-  if (type === 'T') {
-    return [
-      [0, 1, 0],
-      [1, 1, 1],
-      [0, 0, 0],
-    ];
-  }
-  if (type === 'O') {
-    return [
-      [1, 1],
-      [1, 1],
-    ];
-  }
-  if (type === 'L') {
-    return [
-      [1, 0, 0],
-      [1, 1, 1],
-      [0, 0, 0],
-    ];
-  }
-  if (type === 'J') {
-    return [
-      [0, 0, 1],
-      [1, 1, 1],
-      [0, 0, 0],
-    ];
-  }
-  if (type === 'I') {
-    return [
-      [0, 0, 0, 0],
-      [1, 1, 1, 1],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-    ];
-  }
-  if (type === 'S') {
-    return [
-      [0, 1, 1],
-      [1, 1, 0],
-      [0, 0, 0],
-    ];
-  }
-  if (type === 'Z') {
-    return [
-      [1, 1, 0],
-      [0, 1, 1],
-      [0, 0, 0],
-    ];
+  switch (type) {
+    case "T": return [[0,1,0],[1,1,1],[0,0,0]];
+    case "O": return [[1,1],[1,1]];
+    case "L": return [[1,0,0],[1,1,1],[0,0,0]];
+    case "J": return [[0,0,1],[1,1,1],[0,0,0]];
+    case "I": return [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]];
+    case "S": return [[0,1,1],[1,1,0],[0,0,0]];
+    case "Z": return [[1,1,0],[0,1,1],[0,0,0]];
   }
 }
 
-// 衝突判定
+// ===============================
+//  SRS（回転 + 壁蹴り）
+// ===============================
+function rotate(matrix, dir) {
+  for (let y = 0; y < matrix.length; y++) {
+    for (let x = 0; x < y; x++) {
+      [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+    }
+  }
+  if (dir > 0) matrix.forEach(row => row.reverse());
+  else matrix.reverse();
+}
+
+const kickTable = {
+  normal: [[0,0],[1,0],[-1,0],[1,-1],[-1,-1]],
+  I: [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+};
+
+function playerRotate(dir) {
+  const pos = player.pos.x;
+  rotate(player.matrix, dir);
+
+  const kicks = (player.matrix.length === 4) ? kickTable.I : kickTable.normal;
+
+  for (let i = 0; i < kicks.length; i++) {
+    const [kx, ky] = kicks[i];
+    player.pos.x = pos + kx;
+    player.pos.y += ky;
+
+    if (!collide(arena, player)) return;
+
+    player.pos.x = pos;
+    player.pos.y -= ky;
+  }
+
+  rotate(player.matrix, -dir);
+}
+
+// ===============================
+//  7-Bag ランダム生成
+// ===============================
+let bag = [];
+
+function generateBag() {
+  const pieces = ["I","O","T","S","Z","J","L"];
+  for (let i = pieces.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+  }
+  return pieces;
+}
+// ===============================
+//  ホールド機能
+// ===============================
+let holdPiece = null;
+let holdUsed = false;
+
+function playerHold() {
+  if (!settings.hold || holdUsed) return;
+
+  if (holdPiece === null) {
+    holdPiece = player.matrix;
+    playerReset();
+  } else {
+    const temp = player.matrix;
+    player.matrix = holdPiece;
+    holdPiece = temp;
+    player.pos.y = 0;
+    player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+  }
+
+  holdUsed = true;
+}
+
+// ===============================
+//  Next Queue（5個）
+// ===============================
+function drawNext() {
+  nextCtx.fillStyle = "#000";
+  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+  const preview = bag.slice(-5).reverse(); // 次の5つ
+
+  preview.forEach((type, i) => {
+    const matrix = createPiece(type);
+    drawMatrixNext(matrix, { x: 1, y: i * 4 + 1 }, pieceColors[type]);
+  });
+}
+
+function drawMatrixNext(matrix, offset, color) {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        nextCtx.fillStyle = color;
+        nextCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
+      }
+    });
+  });
+}
+
+// ===============================
+//  ホールド描画
+// ===============================
+function drawHold() {
+  holdCtx.fillStyle = "#000";
+  holdCtx.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
+
+  if (!holdPiece) return;
+
+  drawMatrixHold(holdPiece, { x: 1, y: 1 });
+}
+
+function drawMatrixHold(matrix, offset) {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        holdCtx.fillStyle = "#888";
+        holdCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
+      }
+    });
+  });
+}
+
+// ===============================
+//  描画（フィールド・ミノ・ゴースト）
+// ===============================
+function getGhostPosition() {
+  const ghost = {
+    pos: { x: player.pos.x, y: player.pos.y },
+    matrix: player.matrix
+  };
+
+  while (!collide(arena, ghost)) {
+    ghost.pos.y++;
+  }
+  ghost.pos.y--;
+
+  return ghost;
+}
+
+function draw() {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // ゴースト
+  if (settings.ghost) {
+    const ghost = getGhostPosition();
+    drawMatrix(ghost.matrix, ghost.pos, "rgba(255,255,255,0.2)");
+  }
+
+  // フィールド
+  drawMatrix(arena, { x: 0, y: 0 });
+
+  // プレイヤーミノ
+  drawMatrix(player.matrix, player.pos, pieceColors[player.type]);
+
+  // Next & Hold
+  drawNext();
+  drawHold();
+}
+
+function drawMatrix(matrix, offset, color = "cyan") {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+      }
+    });
+  });
+}
+// ===============================
+//  衝突判定
+// ===============================
 function collide(arena, player) {
   const m = player.matrix;
   const o = player.pos;
@@ -84,184 +255,12 @@ function collide(arena, player) {
   return false;
 }
 
-// フィールド作成
-function createMatrix(w, h) {
-  const matrix = [];
-  while (h--) {
-    matrix.push(new Array(w).fill(0));
-  }
-  return matrix;
-}
+// ===============================
+//  ライン消去・コンボ・B2B
+// ===============================
+let combo = -1;
+let backToBack = false;
 
-// 描画
-function draw() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawMatrix(arena, { x: 0, y: 0 }, "cyan");
-  drawMatrix(player.matrix, player.pos, "cyan");
-}
-
-function drawMatrix(matrix, offset) {
-  matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        ctx.fillStyle = "cyan";
-        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
-      }
-    });
-  });
-}
-
-// 落下処理
-function playerDrop() {
-  player.pos.y++;
-  if (collide(arena, player)) {
-    player.pos.y--;
-    merge(arena, player);
-    playerReset();
-  }
-  dropCounter = 0;
-}
-
-// ミノをフィールドに固定
-function merge(arena, player) {
-  player.matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        arena[y + player.pos.y][x + player.pos.x] = value;
-      }
-    });
-  });
-}
-
-// 新しいミノを出す
-function playerReset() {
-  const pieces = "ILJOTSZ";
-  player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
-  player.pos.y = 0;
-  player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-
-  if (collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
-  }
-}
-
-// キー操作
-document.addEventListener("keydown", event => {
-
-  if (event.key === keys.keyLeft) {
-    player.pos.x--;
-    if (collide(arena, player)) player.pos.x++;
-  }
-
-  else if (event.key === keys.keyRight) {
-    player.pos.x++;
-    if (collide(arena, player)) player.pos.x--;
-  }
-
-  else if (event.key === keys.keySoftDrop) {
-    playerDrop();
-  }
-
-  else if (event.key === keys.keyHardDrop) {
-    if (settings.hardDrop) {
-      while (!collide(arena, player)) player.pos.y++;
-      player.pos.y--;
-      merge(arena, player);
-      playerReset();
-      dropCounter = 0;
-    }
-  }
-
-  else if (event.key === keys.keyRotateLeft) {
-    playerRotate(-1);
-  }
-
-  else if (event.key === keys.keyRotateRight) {
-    playerRotate(1);
-  }
-
-  else if (event.key === keys.keyHold) {
-    playerHold();
-  }
-
-});
-
-// ゲームループ
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
-
-function update(time = 0) {
-  const delta = time - lastTime;
-  lastTime = time;
-
-  dropCounter += delta;
-  if (dropCounter > dropInterval) {
-    playerDrop();
-  }
-
-  draw();
-  requestAnimationFrame(update);
-}
-
-const arena = createMatrix(12, 20);
-const player = {
-  pos: { x: 0, y: 0 },
-  matrix: null,
-};
-
-playerReset();
-update();
-drawNext();
-function rotate(matrix, dir) {
-  // 転置
-  for (let y = 0; y < matrix.length; y++) {
-    for (let x = 0; x < y; x++) {
-      [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
-    }
-  }
-
-  // 反転
-  if (dir > 0) {
-    matrix.forEach(row => row.reverse());
-  } else {
-    matrix.reverse();
-  }
-}
-const kickTable = {
-  normal: [
-    [0, 0], [1, 0], [-1, 0], [1, -1], [-1, -1]
-  ],
-  I: [
-    [0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]
-  ]
-};
-function playerRotate(dir) {
-  const pos = player.pos.x;
-  let offset = 1;
-
-  rotate(player.matrix, dir);
-
-  const kicks = (player.matrix.length === 4) ? kickTable.I : kickTable.normal;
-
-  for (let i = 0; i < kicks.length; i++) {
-    const [kx, ky] = kicks[i];
-    player.pos.x = pos + kx;
-    player.pos.y += ky;
-
-    if (!collide(arena, player)) {
-      return;
-    }
-
-    player.pos.x = pos;
-    player.pos.y -= ky;
-  }
-
-  // 回転失敗 → 元に戻す
-  rotate(player.matrix, -dir);
-}
 function arenaSweep() {
   let lines = 0;
 
@@ -281,14 +280,12 @@ function arenaSweep() {
 
   return lines;
 }
-let score = 0;
 
-function addScore(lines) {
-  const table = [0, 100, 300, 500, 800];
-  score += table[lines];
-}
+// ===============================
+//  T-Spin 判定
+// ===============================
 function isTSpin() {
-  if (player.matrix.length !== 3) return false; // Tミノのみ
+  if (player.type !== "T") return false;
 
   const corners = [
     [player.pos.x, player.pos.y],
@@ -304,228 +301,275 @@ function isTSpin() {
 
   return filled >= 3;
 }
-const settings = {
-  ghost: true,
-  hardDrop: true,
-  softDropSpeed: 50,
-  autoRepeat: true,
-};
-function getGhostPosition() {
-  const ghost = {
-    pos: { x: player.pos.x, y: player.pos.y },
-    matrix: player.matrix
-  };
 
-  while (!collide(arena, ghost)) {
-    ghost.pos.y++;
-  }
-  ghost.pos.y--; // 1つ戻す
+// ===============================
+//  スコア・レベル
+// ===============================
+let score = 0;
+let level = 1;
+let linesClearedTotal = 0;
 
-  return ghost;
-}
-function draw() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function addScore(lines, tspin) {
+  let points = 0;
 
-  if (settings.ghost) {
-    const ghost = getGhostPosition();
-    drawMatrix(ghost.matrix, ghost.pos, "rgba(255,255,255,0.2)");
+  if (tspin) {
+    if (lines === 1) points = 800;
+    else if (lines === 2) points = 1200;
+    else if (lines === 3) points = 1600;
+  } else {
+    const table = [0, 100, 300, 500, 800];
+    points = table[lines];
   }
 
-  drawMatrix(arena, { x: 0, y: 0 });
-  drawMatrix(player.matrix, player.pos);
+  // コンボ
+  if (lines > 0) {
+    combo++;
+    if (combo > 0) points += combo * 50;
+  } else {
+    combo = -1;
+  }
+
+  // B2B
+  if ((lines === 4 || tspin) && backToBack) {
+    points = Math.floor(points * 1.5);
+  }
+
+  if (lines === 4 || tspin) backToBack = true;
+  else backToBack = false;
+
+  score += points;
+  linesClearedTotal += lines;
+
+  // レベルアップ
+  if (linesClearedTotal >= level * 10) {
+    level++;
+    dropInterval = Math.max(100, dropInterval - 80);
+  }
 }
-function drawMatrix(matrix, offset, color = "cyan") {
-  matrix.forEach((row, y) => {
+
+// ===============================
+//  ミノ固定 → ライン消去 → スコア → 次のミノ
+// ===============================
+function lockPiece() {
+  merge(arena, player);
+
+  const tspin = isTSpin();
+  const lines = arenaSweep();
+
+  addScore(lines, tspin);
+
+  playerReset();
+  holdUsed = false;
+}
+
+// ===============================
+//  ミノをフィールドに固定
+// ===============================
+function merge(arena, player) {
+  player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+        arena[y + player.pos.y][x + player.pos.x] = value;
       }
     });
   });
 }
-document.addEventListener("keydown", event => {
-  if (event.key === " ") {
-    if (settings.hardDrop) {
-      while (!collide(arena, player)) {
-        player.pos.y++;
-      }
-      player.pos.y--;
-      merge(arena, player);
-      playerReset();
-      dropCounter = 0;
-    }
-  }
-});
-const settings = {
-  ghost: true,
-  hardDrop: true,
-  softDropSpeed: 50,
-  autoRepeat: true,
-  hold: true,
-  bag7: true,
-};
-let holdPiece = null;
-let holdUsed = false;
-function playerHold() {
-  if (!settings.hold || holdUsed) return;
 
-  if (holdPiece === null) {
-    holdPiece = player.matrix;
-    playerReset();
-  } else {
-    const temp = player.matrix;
-    player.matrix = holdPiece;
-    holdPiece = temp;
-    player.pos.y = 0;
-    player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-  }
-
-  holdUsed = true;
-}
-if (event.key === "c" || event.key === "C") {
-  playerHold();
-}
-function playerDrop() {
-  player.pos.y++;
-  if (collide(arena, player)) {
-    player.pos.y--;
-    merge(arena, player);
-    playerReset();
-    holdUsed = false; // ← ここ！
-  }
-  dropCounter = 0;
-}
-let bag = [];
-function generateBag() {
-  const pieces = ["I", "O", "T", "S", "Z", "J", "L"];
-  for (let i = pieces.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
-  }
-  return pieces;
-}
+// ===============================
+//  新しいミノを出す（7-Bag対応）
+// ===============================
 function playerReset() {
+  let pieceType;
+
   if (settings.bag7) {
-    if (bag.length === 0) {
-      bag = generateBag();
-    }
-    const piece = bag.pop();
-    player.matrix = createPiece(piece);
+    if (bag.length === 0) bag = generateBag();
+    pieceType = bag.pop();
   } else {
     const pieces = "ILJOTSZ";
-    player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+    pieceType = pieces[(pieces.length * Math.random()) | 0];
   }
+
+  player.type = pieceType;
+  player.matrix = createPiece(pieceType);
 
   player.pos.y = 0;
   player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
 
   if (collide(arena, player)) {
     arena.forEach(row => row.fill(0));
+    score = 0;
+    level = 1;
+    linesClearedTotal = 0;
+    combo = -1;
+    backToBack = false;
   }
 }
-const nextCanvas = document.getElementById("next");
-const nextCtx = nextCanvas.getContext("2d");
-nextCtx.scale(20, 20);
-function drawNext() {
-  nextCtx.fillStyle = "#000";
-  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+// ===============================
+//  入力処理（DAS / ARR 対応）
+// ===============================
 
-  const preview = bag.slice(-5).reverse(); // 次の5つ
-
-  preview.forEach((type, i) => {
-    const matrix = createPiece(type);
-    drawMatrixNext(matrix, { x: 1, y: i * 4 + 1 });
-  });
-}
-function drawMatrixNext(matrix, offset) {
-  matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        nextCtx.fillStyle = "cyan";
-        nextCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
-      }
-    });
-  });
-}
-function loadSettings() {
-  const s = JSON.parse(localStorage.getItem("tetris_settings")) || {};
-
-  document.getElementById("ghost").checked = s.ghost ?? true;
-  document.getElementById("hardDrop").checked = s.hardDrop ?? true;
-  document.getElementById("hold").checked = s.hold ?? true;
-  document.getElementById("bag7").checked = s.bag7 ?? true;
-  document.getElementById("softDropSpeed").value = s.softDropSpeed ?? 50;
-}
-function saveSettings() {
-  const s = {
-    ghost: document.getElementById("ghost").checked,
-    hardDrop: document.getElementById("hardDrop").checked,
-    hold: document.getElementById("hold").checked,
-    bag7: document.getElementById("bag7").checked,
-    softDropSpeed: Number(document.getElementById("softDropSpeed").value),
-  };
-
-  localStorage.setItem("tetris_settings", JSON.stringify(s));
-  alert("設定を保存しました！");
-}
-const defaultKeys = {
-  keyLeft: "ArrowLeft",
-  keyRight: "ArrowRight",
-  keySoftDrop: "ArrowDown",
-  keyHardDrop: " ",
-  keyRotateLeft: "Ctrl",
-  keyRotateRight: "ArrowUp",
-  keyHold: "c"
+// キー状態
+const keyState = {
+  left: false,
+  right: false,
+  soft: false,
 };
-function loadSettings() {
-  const s = JSON.parse(localStorage.getItem("tetris_settings")) || {};
 
-  // 既存設定
-  document.getElementById("ghost").checked = s.ghost ?? true;
-  document.getElementById("hardDrop").checked = s.hardDrop ?? true;
-  document.getElementById("hold").checked = s.hold ?? true;
-  document.getElementById("bag7").checked = s.bag7 ?? true;
-  document.getElementById("softDropSpeed").value = s.softDropSpeed ?? 50;
+// DAS / ARR タイマー
+let dasTimer = 0;
+let arrTimer = 0;
 
-  // キー設定
-  const keys = s.keys || defaultKeys;
-  for (const k in keys) {
-    document.getElementById(k).value = keys[k];
+// キー押下
+document.addEventListener("keydown", event => {
+  const k = event.key;
+
+  // 左移動
+  if (k === keys.keyLeft) {
+    if (!keyState.left) {
+      movePlayer(-1);
+      dasTimer = performance.now();
+    }
+    keyState.left = true;
   }
-}
-let capturingKey = null;
 
-function startKeyCapture(id) {
-  capturingKey = id;
-  document.getElementById(id).value = "Press key...";
-}
+  // 右移動
+  else if (k === keys.keyRight) {
+    if (!keyState.right) {
+      movePlayer(1);
+      dasTimer = performance.now();
+    }
+    keyState.right = true;
+  }
 
-document.addEventListener("keydown", e => {
-  if (capturingKey) {
-    document.getElementById(capturingKey).value = e.key;
-    capturingKey = null;
+  // ソフトドロップ
+  else if (k === keys.keySoftDrop) {
+    keyState.soft = true;
+  }
+
+  // ハードドロップ
+  else if (k === keys.keyHardDrop) {
+    if (settings.hardDrop) {
+      while (!collide(arena, player)) player.pos.y++;
+      player.pos.y--;
+      lockPiece();
+      dropCounter = 0;
+    }
+  }
+
+  // 左回転
+  else if (k === keys.keyRotateLeft) {
+    playerRotate(-1);
+  }
+
+  // 右回転
+  else if (k === keys.keyRotateRight) {
+    playerRotate(1);
+  }
+
+  // ホールド
+  else if (k === keys.keyHold) {
+    playerHold();
   }
 });
-function saveSettings() {
-  const s = {
-    ghost: document.getElementById("ghost").checked,
-    hardDrop: document.getElementById("hardDrop").checked,
-    hold: document.getElementById("hold").checked,
-    bag7: document.getElementById("bag7").checked,
-    softDropSpeed: Number(document.getElementById("softDropSpeed").value),
-    keys: {
-      keyLeft: document.getElementById("keyLeft").value,
-      keyRight: document.getElementById("keyRight").value,
-      keySoftDrop: document.getElementById("keySoftDrop").value,
-      keyHardDrop: document.getElementById("keyHardDrop").value,
-      keyRotateLeft: document.getElementById("keyRotateLeft").value,
-      keyRotateRight: document.getElementById("keyRotateRight").value,
-      keyHold: document.getElementById("keyHold").value,
-    }
-  };
 
-  localStorage.setItem("tetris_settings", JSON.stringify(s));
-  alert("設定を保存しました！");
+// キー離し
+document.addEventListener("keyup", event => {
+  const k = event.key;
+
+  if (k === keys.keyLeft) keyState.left = false;
+  if (k === keys.keyRight) keyState.right = false;
+  if (k === keys.keySoftDrop) keyState.soft = false;
+});
+
+// ===============================
+//  横移動（DAS / ARR）
+// ===============================
+function handleHorizontalMovement(time) {
+  if (keyState.left || keyState.right) {
+    const direction = keyState.left ? -1 : 1;
+
+    // DAS
+    if (time - dasTimer > settings.das) {
+      // ARR
+      if (time - arrTimer > settings.arr) {
+        movePlayer(direction);
+        arrTimer = time;
+      }
+    }
+  }
 }
+
+function movePlayer(dir) {
+  player.pos.x += dir;
+  if (collide(arena, player)) {
+    player.pos.x -= dir;
+  }
+}
+
+// ===============================
+//  ソフトドロップ
+// ===============================
+function handleSoftDrop(delta) {
+  if (keyState.soft) {
+    player.pos.y += settings.softDropSpeed * (delta / 1000);
+    if (collide(arena, player)) {
+      player.pos.y = Math.floor(player.pos.y);
+      lockPiece();
+    }
+  }
+}
+// ===============================
+//  落下処理
+// ===============================
+let dropCounter = 0;
+let dropInterval = 1000; // レベルで変化
+
+function playerDrop() {
+  player.pos.y++;
+  if (collide(arena, player)) {
+    player.pos.y--;
+    lockPiece();
+  }
+  dropCounter = 0;
+}
+
+// ===============================
+//  ゲームループ
+// ===============================
+let lastTime = 0;
+
+function update(time = 0) {
+  const delta = time - lastTime;
+  lastTime = time;
+
+  dropCounter += delta;
+
+  // 自然落下
+  if (dropCounter > dropInterval) {
+    playerDrop();
+  }
+
+  // 横移動（DAS / ARR）
+  handleHorizontalMovement(time);
+
+  // ソフトドロップ
+  handleSoftDrop(delta);
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+// ===============================
+//  初期化
+// ===============================
+const arena = createMatrix(12, 20);
+
+const player = {
+  pos: { x: 0, y: 0 },
+  matrix: null,
+  type: null,
+};
+
+// ゲーム開始
+playerReset();
+update();
