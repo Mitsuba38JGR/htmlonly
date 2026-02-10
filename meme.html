@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="jp">
+  <head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://content.lifeistech-lesson.jp/Curriculum_materials/Original/global.css" type="text/css">
+  <link rel="stylesheet" href="style.css" type="text/css">
+  <script src="initialize.js"></script>
+</head>
+  <body>
+<section class="search-container">
+  <h2>焼き上がり時間の検索</h2>
+  <!-- 焼き上がり時間の検索-->
+  <div class="search-section">
+    <!-- パンの名前入力-->
+    <div class="search-box">
+      <h3 class="bread-title">パンの名前</h3>
+      <!-- 入力欄-->
+      <select class="bread-input" id="inputText">
+        <option>▾パンを選んでください</option>
+        <option>かんけり</option>
+        <option>KKP</option>
+        <option>かんくん（関くん）</option>
+        <option>解任ひまわり</option>
+        <option>ひまわり</option>
+        <option>さすが関くん格が違う</option>
+        <option>さすが芸人エンタメには事欠かない</option>
+        <option>シンゴ黙れ</option>
+        <option>声が小さーい！！</option>
+        <option>破産王</option>
+        <option>12</option>
+        <option>破産王イカン・OB12世（ハサン12世）</option>
+        <option>数ⅣD</option>
+        <option>賭け算</option>
+        <option>水田二平</option>
+        <option>わちゃべ観察日記</option>
+        <option>は？</option>
+        <option>わちゃべステップ</option>
+        <option>パン君に失礼</option>
+        <option>かんくんだもんね、しょうがないね</option>
+        <option>過冷却チャレンジ</option>
+        <option>蒸し茶碗</option>
+        <option>異食家の関くん</option>
+        <option>移植家の関くん</option>
+        <option>足ない</option>
+        <option>コケ（苔）</option>
+        <option>まずは関を用意します</option>
+      </select>
+      <!-- ボタン-->
+      <button class="search-button" onclick="searchButton()">検索</button>
+    </div>
+    <!-- 焼き上がり時間-->
+    <div class="result-box">
+      <h3 class="result-title">焼き上がり時間</h3>
+      <!-- 表示する時間-->
+      <p class="result-time" id="showText">???</p>
+    </div>
+  </div>
+</section>
+<section class="comment-container">
+  <h2>みんなのコメント</h2>
+  <div class="frame">
+    <!-- 表示欄 -->
+    <div id="comments">
+      <!-- ここに入力内容が追加される -->
+    </div>
+    <!-- 送信フォーム -->
+    <form id="form">
+      <h3 class="comment-title">コメントを書く</h3>
+      <div class="form-frame">
+        <div class="form-fields">
+          <div class="form-field">
+            <label class="label-wrapper">名前</label>
+            <input class="name-input" id="name">
+          </div>
+          <div class="form-field">
+            <label class="label-wrapper">コメント</label>
+            <textarea class="comment-input" id="comment"></textarea>
+          </div>
+        </div>
+        <button type="button" class="submit-button" onclick="submitButton()">送信</button>
+      </div>
+    </form>
+  </div>
+</section>
+    <script src='script.js'></script>
+  </body>
+</html>
