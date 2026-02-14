@@ -61,9 +61,16 @@ let commentsContainer = document.getElementById("comments");
 // コメント一覧を表示する関数
 async function renderAllComments() {
   // データベースのデータを取得
-  async function getComments() {
-  const snapshot = await db.collection("comments").orderBy("createdAt").get();
-  return snapshot.docs.map(doc => doc.data());
+ async function getComments() {
+  const snapshot = await db
+    .collection("comments")
+    .orderBy("createdAt")
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 }
 
 
@@ -108,9 +115,10 @@ async function submitButton() {
   // 名前欄とコメント欄が空でなければ
   if (comment.author != "" && comment.content != "") {
     // コメントをデータベースに送信・保存
-    async function postComment(comment) {
+   async function postComment(comment) {
   await db.collection("comments").add(comment);
 }
+
 
 
     // 入力内容をリセット
@@ -131,11 +139,17 @@ async function likeComment(i) {
 
   // サーバーに更新後のコメント情報を送信（いいねを上書き）
   async function patchComment(i, updatedComment) {
-  const snapshot = await db.collection("comments").orderBy("createdAt").get();
+  // 最新のコメント一覧を取得
+  const snapshot = await db
+    .collection("comments")
+    .orderBy("createdAt")
+    .get();
+
   const docId = snapshot.docs[i].id;
 
   await db.collection("comments").doc(docId).update(updatedComment);
 }
+
 
 
   // 再描画
