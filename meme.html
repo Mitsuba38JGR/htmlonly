@@ -87,6 +87,27 @@
       </div>
     </form>
   </div>
+  commentBox.innerHTML = `
+  <div class="comment-set">
+    <div class="name-datetime-box">
+      <div class="name">${allComments[i]["author"]}</div>
+      <div class="datetime">${allComments[i]["createdAt"]}</div>
+    </div>
+    <pre class="comment-text">${allComments[i]["content"]}</pre>
+
+    <div class="like-container">
+      <div class="like-button" onclick="likeComment(${i})">
+        <img src="images/heart.png" class="like-img">
+        <span class="like-count">${allComments[i]["likes"]}</span>
+      </div>
+
+      <button class="delete-button" onclick="deleteComment(${i})">
+        削除
+      </button>
+    </div>
+  </div>
+`;
+
 </section>
     <script src='memescript.js'></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
