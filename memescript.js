@@ -129,4 +129,29 @@ async function likeComment(i) {
   await renderAllComments();
 }
 
-// ページを開いたときにコメント一
+// ページを開いたときにコメント一覧を表示
+renderAllComments();
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBxaGjAFNCHVzaUlZLaBOSb3uMNzdv27TQ",
+    authDomain: "mitsuba-site.firebaseapp.com",
+    projectId: "mitsuba-site",
+    storageBucket: "mitsuba-site.firebasestorage.app",
+    messagingSenderId: "421838997074",
+    appId: "1:421838997074:web:0e74c3a183ab8b4db2418b",
+    measurementId: "G-S2XQQQD9Z7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
