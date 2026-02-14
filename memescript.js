@@ -158,6 +158,21 @@ async function likeComment(i) {
 
 // ページを開いたときにコメント一覧を表示
 renderAllComments();
+async function deleteComment(i) {
+  // 最新のコメント一覧を取得
+  const snapshot = await db
+    .collection("comments")
+    .orderBy("createdAt")
+    .get();
+
+  const docId = snapshot.docs[i].id;
+
+  // Firestore から削除
+  await db.collection("comments").doc(docId).delete();
+
+  // 再描画
+  await renderAllComments();
+}
 
 <script type="module">
   // Import the functions you need from the SDKs you need
