@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AUTHORIZED ACCESS</title>
+
+<style>
+:root{
+  --bg:#0a0a0a; --fg:#cffff2; --neon:#00ffcc; --deny:#ff3b3b; --ok:#19ff7a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; overflow:hidden;
+}
+.wrap{
+  width:360px; padding:28px; border-radius:18px; position:relative;
+  background:linear-gradient(145deg,#121212,#0e0e0e);
+  box-shadow:0 0 30px #00ffcc22, inset 0 0 30px #000;
+}
+h3{ margin:0 0 18px; letter-spacing:2px; text-align:center; }
+.input{
+  width:100%; margin:10px 0; padding:10px 12px; border-radius:10px;
+  border:1px solid #134b43; background:#000; color:var(--neon);
+  outline:none; transition:.2s;
+}
+.input:focus{ border-color:var(--neon); box-shadow:0 0 12px #00ffcc66; }
+.row{ display:flex; align-items:center; gap:8px; margin:8px 0 14px; }
+button{
+  width:100%; padding:10px; border-radius:12px; border:none; cursor:pointer;
+  background:var(--neon); color:#002a24; font-weight:bold; letter-spacing:1px;
+  transition:.2s;
+}
+button:disabled{ opacity:.5; cursor:not-allowed; }
+button:hover:not(:disabled){ filter:brightness(1.1); }
+.status{ margin-top:12px; min-height:22px; font-size:12px; letter-spacing:1px; }
+
+.scan{
+  position:absolute; left:0; top:0; right:0; height:3px;
+  background:linear-gradient(90deg,transparent,var(--neon),transparent);
+  animation: scan 1.2s linear infinite; display:none;
+}
+@keyframes scan{
+  0%{ transform:translateY(0); opacity:.2;}
+  50%{ opacity:1;}
+  100%{ transform:translateY(340px); opacity:.2;}
+}
+.okFlash{ animation: okf .6s ease; }
+@keyframes okf{
+  0%{ box-shadow:0 0 10px #00ffcc22;}
+  50%{ box-shadow:0 0 40px 10px var(--ok);}
+  100%{ box-shadow:0 0 10px #00ffcc22;}
+}
+.denyFlash{ animation: denyf .4s ease; }
+@keyframes denyf{
+  0%{ box-shadow:0 0 10px #00ffcc22;}
+  50%{ box-shadow:0 0 30px 8px var(--deny);}
+  100%{ box-shadow:0 0 10px #00ffcc22;}
+}
+.locked{
+  box-shadow:0 0 40px 12px var(--deny) !important;
+}
+.footer{ position:fixed; bottom:8px; font-size:10px; opacity:.35; }
+</style>
+</head>
+
+<body>
+
+<div class="wrap" id="w5r9x">
+  <div class="scan" id="s2k7q"></div>
+  <h3>AUTHORIZED ACCESS</h3>
+
+  <input class="input" id="a1x9z" type="text" inputmode="numeric" placeholder="Card Number">
+  <input class="input" id="q7m2k" type="password" inputmode="numeric" placeholder="Security Code">
+
+  <div class="row">
+    <input type="checkbox" id="p4r8t">
+    <label for="p4r8t">I confirm authorization</label>
+  </div>
+
+  <button id="b7n2p" onclick="z9x2v()">ENTER</button>
+  <div class="status" id="u8m3c"></div>
+</div>
+
+<div class="footer">SECURE NODE //FUSETSU JUNIOR HIGH SCHOOL INTERNAL</div>
+
+<script>
+const MAX_FAIL = 3;
+const LOCK_MINUTES = 5;
+const LOCK_KEY = "lock_until_v3";
+const FAIL_KEY = "fail_count_v3";
+
+// ←ここに追加
+const PAIR_HASHES = [
+  "8e2b2d3c7705984f9b6e65d0f2a692d789b957fd5a8b31b314988a425a97c960-7f3ee9fe1fbf452b0c242614e1cad18b6dce034e5bc80763dff6332e872ad2ff"
+  "a5ab2938dce49c9b17e75d3618a38f05b82cd2c0d57acf5992b580d71e09066c-37c20f19f3272b5ccc3a5d80587eb9deb3f4afcf568c4280fb195568da8eb1a2"
+];
+
+async function sha(t){
+  const e = new TextEncoder().encode(t);
+  const h = await crypto.subtle.digest("SHA-256", e);
+  return Array.from(new Uint8Array(h))
+    .map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function getFail(){ return parseInt(localStorage.getItem(FAIL_KEY)||"0",10); }
+function setFail(v){ localStorage.setItem(FAIL_KEY,v); }
+function setLock(t){ localStorage.setItem(LOCK_KEY,t); }
+function getLock(){ return parseInt(localStorage.getItem(LOCK_KEY)||"0",10); }
+function clearLock(){ localStorage.removeItem(LOCK_KEY); localStorage.removeItem(FAIL_KEY); }
+
+function consoleFx(msg){
+  console.log("%c"+msg,"color:#00ffcc;font-family:monospace;");
+}
+
+function errorDuringLock(){
+  const w = document.getElementById("w5r9x");
+  w.classList.add("denyFlash");
+  consoleFx(">> ACCESS BLOCKED (SYSTEM LOCKED)");
+  setTimeout(()=>w.classList.remove("denyFlash"),400);
+}
+
+function checkLockState(){
+  const until = getLock();
+  const st = document.getElementById("u8m3c");
+  if(until && Date.now()<until){
+    const remain = until-Date.now();
+    const m=Math.floor(remain/60000);
+    const s=Math.floor((remain%60000)/1000);
+    st.textContent=`SYSTEM LOCKED (${m}:${s.toString().padStart(2,"0")})`;
+    return true;
+  }else if(until){
+    clearLock();
+  }
+  return false;
+}
+
+async function typeWriter(text, element, speed=60){
+  element.textContent="";
+  for(let i=0;i<text.length;i++){
+    element.textContent += text[i];
+    await new Promise(r=>setTimeout(r,speed));
+  }
+}
+
+async function z9x2v(){
+  if(checkLockState()){
+    errorDuringLock();
+    return;
+  }
+
+  const w = document.getElementById("w5r9x");
+  const scan = document.getElementById("s2k7q");
+  const st = document.getElementById("u8m3c");
+
+  const num = document.getElementById("a1x9z").value.trim();
+  const sec = document.getElementById("q7m2k").value.trim();
+  const chk = document.getElementById("p4r8t").checked;
+
+  if(!chk){ st.textContent="CONFIRMATION REQUIRED"; return; }
+  if(!/^\d+$/.test(num)||!/^\d+$/.test(sec)){
+    st.textContent="INVALID FORMAT"; return;
+  }
+
+  st.textContent="AUTHENTICATING...";
+  scan.style.display="block";
+
+  const pair = (await sha(num))+"-"+(await sha(sec));
+
+  setTimeout(async ()=>{
+    scan.style.display="none";
+
+    if(PAIR_HASHES.includes(pair)){
+      consoleFx(">> ACCESS GRANTED");
+      w.classList.add("okFlash");
+      await typeWriter("Welcome back.", st, 80);
+      setTimeout(()=>{
+        window.location.href="Secret.html";
+      },800);
+    }else{
+      let fails=getFail()+1;
+      setFail(fails);
+      w.classList.add("denyFlash");
+      setTimeout(()=>w.classList.remove("denyFlash"),400);
+
+      if(fails>=MAX_FAIL){
+        const until=Date.now()+LOCK_MINUTES*60*1000;
+        setLock(until);
+      }
+      st.textContent=`ACCESS DENIED (${fails}/${MAX_FAIL})`;
+    }
+  },900);
+}
+
+setInterval(checkLockState,1000);
+
+consoleFx(">> SECURE TERMINAL READY");
+</script>
+
+</body>
+  </html>
