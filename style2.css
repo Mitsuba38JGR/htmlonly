@@ -1,0 +1,187 @@
+body {
+    margin: 0;
+    padding: 40px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+/* 共通ボックスデザイン */
+.login-box,
+.check-button,
+.code-box {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    width: 300px;
+    text-align: center;
+}
+
+/* ボタン共通 */
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    background: #4a6cff;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #2f4ed8;
+}
+
+/* 入力欄 */
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* メッセージ表示 */
+#message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+/* =========================
+   ベース設定
+========================= */
+body {
+    margin: 0;
+    padding: 40px;
+    background: #000;
+    font-family: "Courier New", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    color: #00f7ff;
+    overflow: hidden;
+    position: relative;
+}
+
+/* =========================
+   浮遊ドット背景
+========================= */
+
+body::before {
+    content: "";
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: radial-gradient(#00f7ff 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: moveDots 60s linear infinite;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+@keyframes moveDots {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(200px, 200px);
+    }
+}
+
+/* =========================
+   端ノイズ効果
+========================= */
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+        transparent 60%,
+        rgba(0,255,255,0.1) 100%);
+    mix-blend-mode: screen;
+    z-index: 1;
+}
+
+/* =========================
+   UIボックス
+========================= */
+
+.login-box,
+.check-button,
+.code-box {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00f7ff;
+    padding: 25px;
+    width: 320px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow:
+        0 0 10px #00f7ff,
+        0 0 20px #00f7ff inset;
+    backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 2;
+}
+
+/* テキスト発光 */
+h1, h2, h3 {
+    text-shadow: 0 0 8px #00f7ff;
+}
+
+/* 入力欄 */
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background: black;
+    color: #00f7ff;
+    border: 1px solid #00f7ff;
+    border-radius: 5px;
+}
+
+input:focus {
+    box-shadow: 0 0 10px #00f7ff;
+}
+
+/* セレクト */
+select {
+    width: 100%;
+    padding: 8px;
+    background: black;
+    color: #00f7ff;
+    border: 1px solid #00f7ff;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+/* ボタン */
+button {
+    background: black;
+    color: #00f7ff;
+    border: 1px solid #00f7ff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00f7ff;
+    color: black;
+    box-shadow: 0 0 20px #00f7ff;
+}
+
+/* メッセージ */
+#message {
+    margin-top: 10px;
+    font-size: 14px;
+  }
